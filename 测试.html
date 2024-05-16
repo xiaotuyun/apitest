@@ -1,0 +1,82 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1></h1>
+    <div class="center">
+         <p style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 20px;">可输入内容</p>
+    </div>
+    <div id="api-key-container">
+        <input type="text" id="url" style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 16px; width: 400px;" placeholder="请输入URL">
+        <br>
+        <input type="text" id="api-key" style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 16px; width: 400px;" placeholder="请输入您的 API 密钥">
+        <br>
+        <input type="text" id="model" style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 16px; width: 400px;" placeholder="请输入模型名称">
+        <button onclick="sendMessage()" style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 17px;">发送</button>
+    </div>
+    <div id="chat-container" >
+        <div id="chat"></div>
+       
+        <input type="text" id="user-input" style="width: 300px; font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 16px;" placeholder="请输入您的消息，若响应过慢，请稍等">
+        <button onclick="sendMessage()" style="font-family: '华文楷体', 'STKaiti', 'KaiTi', cursive; font-size: 17px;">发送</button>
+
+    </div>
+
+    <script>
+        function sendMessage() {
+            var userInput = document.getElementById("user-input").value;
+            var chatContainer = document.getElementById("chat");
+
+            // 获取用户输入的 API 密钥、URL 和模型名称
+            var apiKey = document.getElementById("api-key").value;
+            var url = document.getElementById("url").value;
+            var model = document.getElementById("model").value;
+
+            // 检查用户是否提供了 API 密钥、URL 和模型名称
+            if (!apiKey || !url || !model) {
+                alert("请输入有效的 API 密钥、URL 和模型名称！");
+                return;
+            }
+
+            // 将用户消息添加到聊天记录中
+            chatContainer.innerHTML += "<p style='font-family:华文楷体;font-size:20px;'><strong>用户:</strong> " + userInput + "</p>";
+
+            // 发送用户消息到 ChatGPT
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("Authorization", "Bearer " + apiKey); // 将API密钥添加到授权头中
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        var chatGPTResponse = response.choices[0].message.content;
+                        // 将 ChatGPT 的回复添加到聊天记录中
+                        chatContainer.innerHTML += "<p style='font-family:华文楷体;font-size:20px;'><strong>Chat:</strong> " + chatGPTResponse + "</p>";
+                    } else {
+                        // 清空聊天记录并添加错误消息
+                        chatContainer.innerHTML = "<p style='font-family:华文楷体;font-size:20px;'>请求失败，请重试。</p>";
+                    }
+                }
+            };
+            var data = JSON.stringify({
+                model: model,
+                messages: [{ role: 'user', content: userInput }]
+            });
+            xhr.send(data);
+
+            // 清空输入框
+            document.getElementById("user-input").value = "";
+        }
+    </script>
+</body>
+</html>
+
+
+
